@@ -8,8 +8,8 @@ DEFAULT_ERROR = 0.00005
 DEFAULT_OUTPUT = "pagerank_payload.json"
 
 AWS_S3_REGION = "us-east-1"
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "lab144")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "astl1a4b4")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "minioadmin")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "minioadmin")
 
 def generate_payload(endpoint, partitions, num_nodes, bucket, key, error=DEFAULT_ERROR):
     payload = []
