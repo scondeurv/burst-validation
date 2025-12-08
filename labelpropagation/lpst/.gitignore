@@ -1,0 +1,18 @@
+# Rust
+target/
+Cargo.lock
+
+# Results and generated graphs
+*.json
+!example_graph.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
