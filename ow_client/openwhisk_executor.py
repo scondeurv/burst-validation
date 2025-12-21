@@ -31,7 +31,7 @@ class OpenwhiskExecutor:
 
     def burst(self, action_name, params_list, file, is_zip=False, memory=256, debug_mode=False, custom_image=None,
               backend="rabbitmq",
-              burst_size=None, chunk_size=None, join=False) -> ResultDataset:
+              burst_size=None, chunk_size=None, join=False, timeout=60000) -> ResultDataset:
         """
         Function to invoke a burst of actions
         :param action_name: the name of the action to invoke. Action must be located into functions folder.
@@ -45,10 +45,11 @@ class OpenwhiskExecutor:
         :param burst_size: granularity of the burst. If None, the burst is executed in heterogeneous mode
         :param chunk_size: in burst comm middleware message exchanges (in KB)
         :param join: if True, the burst is executed in heterogeneous containers that respects the multiplicity of the burst size
+        :param timeout: timeout in milliseconds for the action execution (default: 60000)
         :return: Dataset with the results and some metrics of the executions
         """
         dataset = ResultDataset()
-        self.__create_action(action_name, file, is_zip, memory, custom_image)
+        self.__create_action(action_name, file, is_zip, memory, custom_image, timeout)
         activation_ids = self.__invoke_burst_actions(action_name, params_list, burst_size, backend, chunk_size, join,
                                                      debug_mode)
         for index, activation_id in enumerate(activation_ids):
@@ -57,7 +58,7 @@ class OpenwhiskExecutor:
         self.__wait_for_completion(dataset)
         return dataset
 
-    def map(self, action_name, params_list, file, is_zip=False, memory=256, custom_image=None) -> ResultDataset:
+    def map(self, action_name, params_list, file, is_zip=False, memory=256, custom_image=None, timeout=60000) -> ResultDataset:
         """
         Function to invoke a map (classic) of actions
         :param action_name: the name of the action to invoke. Action must be located into functions folder.
@@ -66,17 +67,18 @@ class OpenwhiskExecutor:
         :param is_zip: indicates if the action is a zip file or a single .rs file
         :param memory: memory to allocate to the action
         :param custom_image: if not None, the action is executed in a container with the specified image
+        :param timeout: timeout in milliseconds for the action execution (default: 60000)
         :return: Dataset with the results and some metrics of the executions
         """
         dataset = ResultDataset()
-        self.__create_action(action_name, file, is_zip, memory, custom_image)
+        self.__create_action(action_name, file, is_zip, memory, custom_image, timeout)
         for index, input in enumerate(params_list):
             activation_id = self.__invoke_single_action(action_name, input)
             dataset.add_invocation(index, activation_id, time.time(), is_burst=False)
         self.__wait_for_completion(dataset)
         return dataset
 
-    def __create_action(self, action_name, file, is_zip, memory, custom_image):
+    def __create_action(self, action_name, file, is_zip, memory, custom_image, timeout=60000):
         action_data = {
             "exec": {
                 "main": "main",
@@ -87,6 +89,7 @@ class OpenwhiskExecutor:
             "namespace": "guest",
             "limits": {
                 "memory": memory,
+                "timeout": timeout
             }
         }
         if is_zip:

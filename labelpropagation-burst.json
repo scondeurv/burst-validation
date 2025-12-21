@@ -1,0 +1,270 @@
+[
+  {
+    "fn_id": "worker-0",
+    "host_submit": 1766356068335,
+    "timestamps": [
+      {
+        "key": "worker_start",
+        "value": "1766356124316"
+      },
+      {
+        "key": "get_input",
+        "value": "1766356124343"
+      },
+      {
+        "key": "get_input_end",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_start",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_end",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_start",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "worker_end",
+        "value": "1766356124347"
+      }
+    ],
+    "finished": 1766356126724
+  },
+  {
+    "fn_id": "worker-1",
+    "host_submit": 1766356068335,
+    "timestamps": [
+      {
+        "key": "worker_start",
+        "value": "1766356124316"
+      },
+      {
+        "key": "get_input",
+        "value": "1766356124343"
+      },
+      {
+        "key": "get_input_end",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_start",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_end",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_start",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "worker_end",
+        "value": "1766356124347"
+      }
+    ],
+    "finished": 1766356126724
+  },
+  {
+    "fn_id": "worker-2",
+    "host_submit": 1766356068335,
+    "timestamps": [
+      {
+        "key": "worker_start",
+        "value": "1766356124316"
+      },
+      {
+        "key": "get_input",
+        "value": "1766356124343"
+      },
+      {
+        "key": "get_input_end",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_start",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_end",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_start",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "worker_end",
+        "value": "1766356124347"
+      }
+    ],
+    "finished": 1766356126724
+  },
+  {
+    "fn_id": "worker-3",
+    "host_submit": 1766356068335,
+    "timestamps": [
+      {
+        "key": "worker_start",
+        "value": "1766356124316"
+      },
+      {
+        "key": "get_input",
+        "value": "1766356124343"
+      },
+      {
+        "key": "get_input_end",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_start",
+        "value": "1766356124345"
+      },
+      {
+        "key": "iter_0_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_0_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_end",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_start",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_broadcast_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_compute",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_labels",
+        "value": "1766356124346"
+      },
+      {
+        "key": "iter_1_reduce_changed",
+        "value": "1766356124346"
+      },
+      {
+        "key": "worker_end",
+        "value": "1766356124347"
+      }
+    ],
+    "finished": 1766356126724
+  }
+]
