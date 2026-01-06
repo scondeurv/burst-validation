@@ -36,11 +36,12 @@ for partition in range(num_partitions):
     end_node = start_node + nodes_per_partition
     
     # Create edges: each node -> next node (with wraparound)
-    # Also add some initial labels for variety
-    for node in range(start_node, end_node):
+    # Add seed labels: one seed every N nodes within this partition
+    seed_interval = 25  # Creates ~10 seeds per partition
+    for i, node in enumerate(range(start_node, end_node)):
         next_node = (node + 1) % num_nodes
-        # Add initial label for some nodes (based on partition)
-        if node % nodes_per_partition == 0:
+        # Add initial label for seed nodes (evenly distributed in partition)
+        if i % seed_interval == 0:
             edges.append(f"{node}\t{next_node}\t{partition}")
         else:
             edges.append(f"{node}\t{next_node}")

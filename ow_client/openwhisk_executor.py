@@ -22,6 +22,7 @@ class OpenwhiskExecutor:
         self.host = host
         self.port = port
         self.session = requests.Session()
+        self.session.verify = False
         self.session.headers.update({"Authorization": f"Basic {AUTH_TOKEN}", "Content-Type": "application/json"})
         self.session.verify = False
         warnings.filterwarnings('ignore', category=InsecureRequestWarning)
