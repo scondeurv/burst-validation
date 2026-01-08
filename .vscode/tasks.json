@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "check-pods",
+			"type": "shell",
+			"command": "kubectl get pods -n openwhisk"
+		}
+	]
+}
