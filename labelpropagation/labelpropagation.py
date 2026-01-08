@@ -44,10 +44,16 @@ if __name__ == "__main__":
     flattened_results = [item for sublist in dt.get_results() for item in sublist]
     flattened_results.sort(key=lambda x: x['key'])
 
-    results = [{"fn_id": i["key"],
-                "host_submit": host_submit,
-                "timestamps": i["timestamps"],
-                "finished": finished
-                } for i in flattened_results]
+    results = []
+    for i in flattened_results:
+        res = {
+            "fn_id": i["key"],
+            "host_submit": host_submit,
+            "timestamps": i["timestamps"],
+            "finished": finished
+        }
+        if "labels" in i:
+            res["labels"] = i["labels"]
+        results.append(res)
 
     json.dump(results, open("labelpropagation-burst.json", "w"))

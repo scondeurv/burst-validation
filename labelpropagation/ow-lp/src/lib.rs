@@ -41,6 +41,8 @@ struct Output {
     bucket: String,
     key: String,
     timestamps: Vec<Timestamp>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    labels: Option<Vec<u32>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -236,10 +238,21 @@ fn label_propagation(
     let (graph, initial_labels) = rt.block_on(load_partition(&params, &s3_client, worker, burst_size));
     timestamps.push(timestamp("get_input_end"));
 
+    // Initialize labels: use provided labels or node ID as initial community
     let mut labels = vec![UNKNOWN; params.num_nodes as usize];
     for (node, label) in initial_labels.iter() {
         if (*node as usize) < labels.len() {
             labels[*node as usize] = *label;
+        }
+    }
+    
+    // If no initial labels provided, use unsupervised mode: each node starts with its own ID
+    if initial_labels.is_empty() {
+        println!("[Worker {}] No initial labels found, using unsupervised mode (each node = own community)", worker);
+        for idx in 0..params.num_nodes as usize {
+            if (idx as u32) % burst_size == worker {
+                labels[idx] = idx as u32;
+            }
         }
     }
 
@@ -266,6 +279,7 @@ fn label_propagation(
     let max_iter = params.max_iterations.unwrap_or(MAX_ITER);
     let threshold = params.convergence_threshold.unwrap_or(0);
     let mut iter = 0;
+    let unsupervised_mode = initial_labels.is_empty();
 
     while iter < max_iter {
         timestamps.push(timestamp(&format!("iter_{}_start", iter)));
@@ -280,31 +294,41 @@ fn label_propagation(
         };
         timestamps.push(timestamp(&format!("iter_{}_broadcast_labels", iter)));
 
-        let mut local_updates = vec![UNKNOWN; labels.len()];
+        let mut local_updates = vec![UNKNOWN; params.num_nodes as usize];
         let mut local_changed: u64 = 0;
 
-        for (node, neighbors) in graph.iter() {
-            let idx = *node as usize;
+        for idx in 0..params.num_nodes as usize {
+            if (idx as u32) % burst_size != worker {
+                continue;
+            }
+
             let current_label = global_labels.0.get(idx).cloned().unwrap_or(UNKNOWN);
 
-            // Clamp labeled nodes
-            if initial_labels.contains_key(node) {
+            // Clamp labeled nodes ONLY in supervised mode
+            if !unsupervised_mode && initial_labels.contains_key(&(idx as u32)) {
                 local_updates[idx] = current_label;
                 continue;
             }
 
-            let mut counts: HashMap<u32, usize> = HashMap::new();
-            for neighbor in neighbors {
-                let n_idx = *neighbor as usize;
-                if let Some(label) = global_labels.0.get(n_idx) {
-                    *counts.entry(*label).or_insert(0) += 1;
+            if let Some(neighbors) = graph.get(&(idx as u32)) {
+                let mut counts: HashMap<u32, usize> = HashMap::new();
+                for neighbor in neighbors {
+                    let n_idx = *neighbor as usize;
+                    if let Some(label) = global_labels.0.get(n_idx) {
+                        if *label != UNKNOWN {
+                            *counts.entry(*label).or_insert(0) += 1;
+                        }
+                    }
                 }
-            }
 
-            let new_label = majority_label(&counts, current_label);
-            local_updates[idx] = new_label;
-            if new_label != current_label {
-                local_changed += 1;
+                let new_label = majority_label(&counts, current_label);
+                local_updates[idx] = new_label;
+                if new_label != current_label {
+                    local_changed += 1;
+                }
+            } else {
+                // Node owned by this worker but has no outgoing edges
+                local_updates[idx] = current_label;
             }
         }
         timestamps.push(timestamp(&format!("iter_{}_compute", iter)));
@@ -379,6 +403,11 @@ fn label_propagation(
         bucket: params.input_data.bucket.clone(),
         key: format!("worker-{}", worker),
         timestamps,
+        labels: if worker == ROOT_WORKER {
+            Some(global_labels.0)
+        } else {
+            None
+        },
     }
 }
 

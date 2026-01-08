@@ -37,7 +37,7 @@ for partition in range(num_partitions):
     
     # Create edges: each node -> next node (with wraparound)
     # Add seed labels: one seed every N nodes within this partition
-    seed_interval = 25  # Creates ~10 seeds per partition
+    seed_interval = 10  # Creates ~25 seeds per partition (10% of nodes have labels)
     for i, node in enumerate(range(start_node, end_node)):
         next_node = (node + 1) % num_nodes
         # Add initial label for seed nodes (evenly distributed in partition)

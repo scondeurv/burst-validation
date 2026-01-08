@@ -37,10 +37,16 @@ if __name__ == "__main__":
     flattened_results = [item for sublist in dt.get_results() for item in sublist]
     flattened_results.sort(key=lambda x: x['key'])
 
-    results = [{"fn_id": i["key"],
-                "host_submit": host_submit,
-                "timestamps": i["timestamps"],
-                "finished": finished
-                } for i in flattened_results]
+    results = []
+    for i in flattened_results:
+        res = {
+            "fn_id": i["key"],
+            "host_submit": host_submit,
+            "timestamps": i["timestamps"],
+            "finished": finished
+        }
+        if "page_ranks" in i:
+            res["page_ranks"] = i["page_ranks"]
+        results.append(res)
 
     json.dump(results, open("pagerank-burst.json", "w"))

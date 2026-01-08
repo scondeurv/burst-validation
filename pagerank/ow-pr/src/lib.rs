@@ -39,6 +39,8 @@ struct Output {
     bucket: String,
     key: String,
     timestamps: Vec<Timestamp>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    page_ranks: Option<Vec<f64>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -335,6 +337,11 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
         bucket: params.input_data.bucket.clone(),
         key: params.input_data.key.clone(),
         timestamps,
+        page_ranks: if worker == ROOT_WORKER {
+            Some(page_ranks)
+        } else {
+            None
+        },
     }
 }
 
