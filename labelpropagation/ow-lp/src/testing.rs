@@ -3,7 +3,6 @@ use burst_communication_middleware::{
     BurstMiddleware, BurstOptions, Middleware, RedisListImpl, RedisListOptions, TokioChannelImpl,
     TokioChannelOptions,
 };
-use bytes::Bytes;
 use clap::Parser;
 use log::info;
 use serde_json::Value;
@@ -17,16 +16,16 @@ use std::{
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value = "labelpropagation")]
+    #[arg(long, default_value = "labelpropagation")]
     burst_id: String,
 
-    #[arg(short, long)]
+    #[arg(long)]
     granularity: u32,
 
-    #[arg(short, long)]
+    #[arg(long)]
     burst_size: u32,
 
-    #[arg(short, long)]
+    #[arg(long)]
     group_id: u32,
 
     #[arg(short, long, default_value = "input_payload.json")]

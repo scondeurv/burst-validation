@@ -41,8 +41,23 @@ if __name__ == "__main__":
                         is_zip=True)
     finished = get_millis()
 
-    flattened_results = [item for sublist in dt.get_results() for item in sublist]
-    flattened_results.sort(key=lambda x: x['key'])
+    dt_results = dt.get_results()
+    print("DEBUG RAW RESULTS:", dt_results)
+    
+    flattened_results = []
+    for sublist in dt_results:
+        if isinstance(sublist, list):
+            flattened_results.extend(sublist)
+        else:
+            # Handle error case or unexpected structure
+            print(f"WARNING: Unexpected result structure: {sublist}")
+            continue
+
+    if not flattened_results:
+        print("ERROR: No results returned from workers.")
+        exit(1)
+
+    flattened_results.sort(key=lambda x: x.get('key', 'unknown'))
 
     results = []
     for i in flattened_results:

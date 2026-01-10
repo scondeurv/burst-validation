@@ -63,35 +63,29 @@ fn timestamp(key: &str) -> Timestamp {
 }
 
 /// Full label vector message (one `u32` per node)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LabelsMessage(pub Vec<u32>);
 
 impl From<Bytes> for LabelsMessage {
     fn from(bytes: Bytes) -> Self {
-        let mut vecu8 = bytes.to_vec();
-        let vecu32 = unsafe {
-            let ratio = std::mem::size_of::<u32>() / std::mem::size_of::<u8>();
-            let length = vecu8.len() / ratio;
-            let capacity = vecu8.capacity() / ratio;
-            let ptr = vecu8.as_mut_ptr() as *mut u32;
-            std::mem::forget(vecu8);
-            Vec::from_raw_parts(ptr, length, capacity)
-        };
+        let vecu32 = bytes
+            .chunks_exact(4)
+            .map(|chunk| {
+                let arr: [u8; 4] = chunk.try_into().unwrap();
+                u32::from_le_bytes(arr)
+            })
+            .collect();
         LabelsMessage(vecu32)
     }
 }
 
 impl From<LabelsMessage> for Bytes {
-    fn from(mut val: LabelsMessage) -> Self {
-        let vec8 = unsafe {
-            let ratio = std::mem::size_of::<u32>() / std::mem::size_of::<u8>();
-            let length = val.0.len() * ratio;
-            let capacity = val.0.capacity() * ratio;
-            let ptr = val.0.as_mut_ptr() as *mut u8;
-            std::mem::forget(val.0);
-            Vec::from_raw_parts(ptr, length, capacity)
-        };
-        Bytes::from(vec8)
+    fn from(val: LabelsMessage) -> Self {
+        let mut bytes = Vec::with_capacity(val.0.len() * 4);
+        for num in val.0 {
+            bytes.extend_from_slice(&num.to_le_bytes());
+        }
+        Bytes::from(bytes)
     }
 }
 
@@ -102,7 +96,9 @@ struct CountMessage(pub u64);
 impl From<Bytes> for CountMessage {
     fn from(bytes: Bytes) -> Self {
         let mut arr = [0u8; 8];
-        arr.copy_from_slice(&bytes[..8]);
+        if bytes.len() >= 8 {
+            arr.copy_from_slice(&bytes[..8]);
+        }
         CountMessage(u64::from_le_bytes(arr))
     }
 }
@@ -136,28 +132,42 @@ async fn load_partition(
     let mut initial_labels: HashMap<u32, u32> = HashMap::new();
 
     while let Some(line) = lines.next_line().await.unwrap() {
-        if line.trim().is_empty() {
-            continue;
-        }
-        let parts: Vec<&str> = line.split('\t').collect();
-        if parts.len() < 2 {
-            continue;
-        }
-        let src: u32 = parts[0].parse().unwrap();
-        if src % burst_size != worker_id {
-            continue;
-        }
-        let dst: u32 = parts[1].parse().unwrap();
-        graph.entry(src).or_default().push(dst);
-        if parts.len() >= 3 {
-            let label: i64 = parts[2].parse().unwrap_or(-1);
-            if label >= 0 {
-                initial_labels.insert(src, label as u32);
-            }
-        }
+        process_graph_line(&line, &mut graph, &mut initial_labels, worker_id, burst_size);
     }
 
     (graph, initial_labels)
+}
+
+fn process_graph_line(
+    line: &str,
+    graph: &mut HashMap<u32, Vec<u32>>,
+    initial_labels: &mut HashMap<u32, u32>,
+    worker_id: u32,
+    burst_size: u32,
+) {
+    if line.trim().is_empty() {
+        return;
+    }
+    let parts: Vec<&str> = line.split('\t').collect();
+    if parts.len() < 2 {
+        return;
+    }
+    
+    // Use parse().ok() to allow cleaner failure handling
+    if let (Ok(src), Ok(dst)) = (parts[0].parse::<u32>(), parts[1].parse::<u32>()) {
+        if src % burst_size != worker_id {
+            return;
+        }
+        graph.entry(src).or_default().push(dst);
+        
+        if parts.len() >= 3 {
+             if let Ok(label) = parts[2].parse::<i64>() {
+                if label >= 0 {
+                    initial_labels.insert(src, label as u32);
+                }
+             }
+        }
+    }
 }
 
 fn should_continue(iter: u32, max_iter: Option<u32>, changed: u32, threshold: u32) -> bool {
@@ -245,15 +255,35 @@ fn label_propagation(
             labels[*node as usize] = *label;
         }
     }
+
+    // Check globally if any worker has seeds
+    // Use LabelsMessage to transport boolean flag (1=true, 0=false) because middleware is typed to LabelsMessage
+    let local_has_seeds_val = if !initial_labels.is_empty() { 1 } else { 0 };
+    let reduced_seeds_msg = middleware
+        .reduce(LabelsMessage(vec![local_has_seeds_val]), |a, b| {
+            LabelsMessage(vec![if a.0[0] == 1 || b.0[0] == 1 { 1 } else { 0 }])
+        })
+        .unwrap();
+
+    let global_seeds_msg = if let Some(msg) = reduced_seeds_msg {
+        middleware.broadcast(Some(msg), ROOT_WORKER).unwrap()
+    } else {
+        middleware.broadcast(None, ROOT_WORKER).unwrap()
+    };
     
-    // If no initial labels provided, use unsupervised mode: each node starts with its own ID
-    if initial_labels.is_empty() {
-        println!("[Worker {}] No initial labels found, using unsupervised mode (each node = own community)", worker);
+    let global_has_seeds = global_seeds_msg.0[0] == 1;
+    
+    // If no initial labels provided GLOBALLY, use unsupervised mode: each node starts with its own ID
+    // If seeds exist anywhere, nodes without seeds remain UNKNOWN
+    if !global_has_seeds && initial_labels.is_empty() {
+        println!("[Worker {}] No initial labels found globally, using unsupervised mode (each node = own community)", worker);
         for idx in 0..params.num_nodes as usize {
             if (idx as u32) % burst_size == worker {
                 labels[idx] = idx as u32;
             }
         }
+    } else if global_has_seeds && initial_labels.is_empty() {
+        println!("[Worker {}] Seeds exist globally. Local partition has no seeds -> Keeping as UNKNOWN.", worker);
     }
 
     // Reduce initial labels to build a consistent global view, then broadcast
@@ -371,7 +401,6 @@ fn label_propagation(
         } else {
             false
         };
-
         // Broadcast stop decision to all workers (0 = continue, 1 = stop)
         let stop_signal = middleware
             .broadcast(
@@ -385,12 +414,6 @@ fn label_propagation(
             .unwrap();
 
         if stop_signal.0[0] == 1 {
-            // Broadcast final labels before stopping
-            if middleware.info.worker_id == ROOT_WORKER {
-                middleware
-                    .broadcast(Some(LabelsMessage(global_labels.0.clone())), ROOT_WORKER)
-                    .ok();
-            }
             break;
         }
 
@@ -416,4 +439,77 @@ pub fn main(args: Value, burst_middleware: Middleware<LabelsMessage>) -> Result<
     let handle = burst_middleware.get_actor_handle();
     let result = label_propagation(input, &handle);
     serde_json::to_value(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_labels_message_serialization() {
+        let original = LabelsMessage(vec![1, 2, u32::MAX, 123456]);
+        let bytes: Bytes = original.clone().into();
+        let decoded: LabelsMessage = bytes.into();
+        assert_eq!(original, decoded);
+    }
+
+    #[test]
+    fn test_count_message_serialization() {
+        let original = CountMessage(99999);
+        let bytes: Bytes = original.clone().into();
+        let decoded: CountMessage = bytes.into();
+        assert_eq!(original.0, decoded.0);
+    }
+
+    #[test]
+    fn test_majority_label() {
+        // Clear winner
+        let mut counts = HashMap::new();
+        counts.insert(1, 10);
+        counts.insert(2, 5);
+        assert_eq!(majority_label(&counts, 99), 1);
+
+        // Tie breaking (lowest label wins)
+        let mut counts = HashMap::new();
+        counts.insert(10, 5);
+        counts.insert(20, 5);
+        assert_eq!(majority_label(&counts, 99), 10);
+
+        // Fallback to current
+        let counts = HashMap::new();
+        assert_eq!(majority_label(&counts, 55), 55);
+    }
+
+    #[test]
+    fn test_should_continue() {
+        // Under max_iter, changed > threshold -> Continue
+        assert!(should_continue(0, Some(10), 5, 0));
+        
+        // Under max_iter, changed <= threshold -> Stop
+        assert!(!should_continue(0, Some(10), 0, 0));
+
+        // Over max_iter -> Stop
+        assert!(!should_continue(10, Some(10), 5, 0));
+    }
+
+    #[test]
+    fn test_process_graph_line() {
+        let mut graph = HashMap::new();
+        let mut initials = HashMap::new();
+        let worker_id = 0;
+        let burst_size = 2; // worker 0 handles even nodes, worker 1 handles odd nodes
+
+        // Valid line for worker 0
+        process_graph_line("0\t1", &mut graph, &mut initials, worker_id, burst_size);
+        assert!(graph.contains_key(&0));
+        assert_eq!(graph[&0], vec![1]);
+
+        // Line for worker 1 (should be ignored)
+        process_graph_line("1\t2", &mut graph, &mut initials, worker_id, burst_size);
+        assert!(!graph.contains_key(&1));
+
+        // Line with label
+        process_graph_line("2\t3\t99", &mut graph, &mut initials, worker_id, burst_size);
+        assert_eq!(initials[&2], 99);
+    }
 }
