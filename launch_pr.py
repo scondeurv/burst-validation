@@ -14,10 +14,10 @@ import json
 # Hardcoded configuration for simplicity
 TIMEOUT = 300000  # 5 minutes
 NUM_WORKERS = 4
-NUM_NODES = 4  # Based on test dataset
-PR_ENDPOINT = "http://192.168.49.1:9000"
+NUM_NODES = 5  # Based on test dataset
+PR_ENDPOINT = "http://minio-service.default:9000"
 BACKEND = "redis-list"
-REDIS_URL = "redis://192.168.49.1:6379"
+REDIS_URL = "redis://dragonfly.default:6379"
 BUCKET = "test-bucket"
 KEY = "graphs/pagerank"
 CUSTOM_IMAGE = "burstcomputing/runtime-rust-burst:latest"

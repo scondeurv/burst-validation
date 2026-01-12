@@ -14,17 +14,17 @@ from ow_client.time_helper import get_millis
 # Configuration
 OW_HOST = "localhost"
 OW_PORT = 31001
-LP_ENDPOINT = "http://192.168.49.1:9000"
-PARTITIONS = 4
-NUM_NODES = 1000
+LP_ENDPOINT = "http://minio-service.default:9000"
+PARTITIONS = 8
+NUM_NODES = 20
 BUCKET = "test-bucket"
-KEY = "graphs/test-graph"
-GRANULARITY = 4
+KEY = "graphs/deterministic-complex"
+GRANULARITY = 1
 BACKEND = "redis-list"
 CHUNK_SIZE = 1024
-MAX_ITERATIONS = 10
+MAX_ITERATIONS = 5
 CONVERGENCE_THRESHOLD = 0
-MEMORY = 4096
+MEMORY = 256
 TIMEOUT = 300000  # 5 minutes in milliseconds
 CUSTOM_IMAGE = "burstcomputing/runtime-rust-burst:latest"
 
@@ -62,7 +62,7 @@ try:
     dt = executor.burst(
         "labelpropagation",
         params,
-        file="labelpropagation/labelpropagation.zip",
+        file="labelpropagation.zip",
         memory=MEMORY,
         custom_image=CUSTOM_IMAGE,
         debug_mode=True,

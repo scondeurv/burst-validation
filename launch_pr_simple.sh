@@ -10,7 +10,7 @@ echo ""
 python3 pagerank.py \
   --ow-host localhost \
   --ow-port 31001 \
-  --pr-endpoint http://192.168.49.1:9000 \
+  --pr-endpoint http://minio-service.default:9000 \
   --partitions 4 \
   --num-nodes 5 \
   --bucket test-bucket \

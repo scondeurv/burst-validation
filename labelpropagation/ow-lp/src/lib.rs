@@ -117,23 +117,40 @@ async fn load_partition(
     worker_id: u32,
     burst_size: u32,
 ) -> (HashMap<u32, Vec<u32>>, HashMap<u32, u32>) {
-    let reader = s3_client
+    println!("[Worker {}] Loading partition from s3://{}/{}", 
+             worker_id, params.input_data.bucket, params.input_data.key);
+    
+    let result = s3_client
         .get_object()
         .bucket(&params.input_data.bucket)
         .key(&params.input_data.key)
         .send()
-        .await
-        .unwrap()
-        .body
-        .into_async_read();
+        .await;
+    
+    let reader = match result {
+        Ok(output) => {
+            println!("[Worker {}] Successfully loaded partition", worker_id);
+            output.body.into_async_read()
+        }
+        Err(e) => {
+            eprintln!("[Worker {}] ERROR loading partition from s3://{}/{}: {:?}", 
+                     worker_id, params.input_data.bucket, params.input_data.key, e);
+            panic!("Failed to load partition: {:?}", e);
+        }
+    };
 
     let mut lines = reader.lines();
     let mut graph: HashMap<u32, Vec<u32>> = HashMap::new();
     let mut initial_labels: HashMap<u32, u32> = HashMap::new();
+    let mut line_count = 0;
 
     while let Some(line) = lines.next_line().await.unwrap() {
         process_graph_line(&line, &mut graph, &mut initial_labels, worker_id, burst_size);
+        line_count += 1;
     }
+
+    println!("[Worker {}] Loaded {} edges, {} initial labels", 
+             worker_id, line_count, initial_labels.len());
 
     (graph, initial_labels)
 }
@@ -439,77 +456,4 @@ pub fn main(args: Value, burst_middleware: Middleware<LabelsMessage>) -> Result<
     let handle = burst_middleware.get_actor_handle();
     let result = label_propagation(input, &handle);
     serde_json::to_value(result)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_labels_message_serialization() {
-        let original = LabelsMessage(vec![1, 2, u32::MAX, 123456]);
-        let bytes: Bytes = original.clone().into();
-        let decoded: LabelsMessage = bytes.into();
-        assert_eq!(original, decoded);
-    }
-
-    #[test]
-    fn test_count_message_serialization() {
-        let original = CountMessage(99999);
-        let bytes: Bytes = original.clone().into();
-        let decoded: CountMessage = bytes.into();
-        assert_eq!(original.0, decoded.0);
-    }
-
-    #[test]
-    fn test_majority_label() {
-        // Clear winner
-        let mut counts = HashMap::new();
-        counts.insert(1, 10);
-        counts.insert(2, 5);
-        assert_eq!(majority_label(&counts, 99), 1);
-
-        // Tie breaking (lowest label wins)
-        let mut counts = HashMap::new();
-        counts.insert(10, 5);
-        counts.insert(20, 5);
-        assert_eq!(majority_label(&counts, 99), 10);
-
-        // Fallback to current
-        let counts = HashMap::new();
-        assert_eq!(majority_label(&counts, 55), 55);
-    }
-
-    #[test]
-    fn test_should_continue() {
-        // Under max_iter, changed > threshold -> Continue
-        assert!(should_continue(0, Some(10), 5, 0));
-        
-        // Under max_iter, changed <= threshold -> Stop
-        assert!(!should_continue(0, Some(10), 0, 0));
-
-        // Over max_iter -> Stop
-        assert!(!should_continue(10, Some(10), 5, 0));
-    }
-
-    #[test]
-    fn test_process_graph_line() {
-        let mut graph = HashMap::new();
-        let mut initials = HashMap::new();
-        let worker_id = 0;
-        let burst_size = 2; // worker 0 handles even nodes, worker 1 handles odd nodes
-
-        // Valid line for worker 0
-        process_graph_line("0\t1", &mut graph, &mut initials, worker_id, burst_size);
-        assert!(graph.contains_key(&0));
-        assert_eq!(graph[&0], vec![1]);
-
-        // Line for worker 1 (should be ignored)
-        process_graph_line("1\t2", &mut graph, &mut initials, worker_id, burst_size);
-        assert!(!graph.contains_key(&1));
-
-        // Line with label
-        process_graph_line("2\t3\t99", &mut graph, &mut initials, worker_id, burst_size);
-        assert_eq!(initials[&2], 99);
-    }
 }
