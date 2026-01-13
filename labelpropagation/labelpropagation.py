@@ -32,18 +32,18 @@ if __name__ == "__main__":
     dt = executor.burst("labelpropagation",
                         params,
                         file="./labelpropagation.zip",
-                        memory=args.runtime_memory if args.runtime_memory else 4096,
+                        memory=args.runtime_memory if args.runtime_memory else 2048,
                         custom_image=args.custom_image,
                         debug_mode=args.debug,
-                        burst_size=len(params),
+                        burst_size=args.granularity if args.granularity else len(params),
                         join=args.join,
                         backend=args.backend,
                         chunk_size=args.chunk_size,
-                        is_zip=True)
+                        is_zip=True,
+                        timeout=300000)
     finished = get_millis()
 
     dt_results = dt.get_results()
-    print("DEBUG RAW RESULTS:", dt_results)
     
     flattened_results = []
     for sublist in dt_results:

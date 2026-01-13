@@ -1,7 +1,8 @@
 use std::{
-    collections::{HashMap, HashSet},
     time::{SystemTime, UNIX_EPOCH},
 };
+use ahash::{AHashMap, AHashSet};
+use futures::future::join_all;
 
 use aws_config::Region;
 use aws_credential_types::Credentials;
@@ -21,6 +22,8 @@ struct Input {
     error: f64,
     iterations: Option<u32>,
     num_nodes: u32,
+    partitions: u32,
+    granularity: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -103,58 +106,88 @@ impl From<PagerankMessage> for Bytes {
     }
 }
 
-async fn get_adjacency_matrix(
+async fn load_partition_flat(
     params: &Input,
     s3_client: &S3Client,
-) -> (HashMap<u32, HashSet<u32>>, (u32, u32)) {
-    let buf_read = s3_client
-        .get_object()
-        .bucket(params.input_data.bucket.clone())
-        .key(params.input_data.key.clone())
-        .send()
-        .await
-        .unwrap()
-        .body
-        .into_async_read();
+    worker_id: u32,
+) -> (Vec<u32>, Vec<u32>, Vec<u32>) {
+    let start_part = worker_id * params.granularity;
+    let end_part = (worker_id + 1) * params.granularity;
+    
+    let mut fetch_futures = Vec::new();
 
-    let mut lines = buf_read.lines();
+    for p in start_part..end_part {
+        let part_key = format!("{}/part-{}", params.input_data.key, p);
+        fetch_futures.push(async move {
+            s3_client
+                .get_object()
+                .bucket(&params.input_data.bucket)
+                .key(&part_key)
+                .send()
+                .await
+        });
+    }
 
-    let mut edges: HashMap<u32, HashSet<u32>> = HashMap::new();
-    let mut min_node: u32 = u32::MAX;
-    let mut max_node: u32 = 0;
+    let results = join_all(fetch_futures).await;
+    let mut edges = Vec::with_capacity(100_000 * params.granularity as usize);
 
-    while let Some(line) = lines.next_line().await.unwrap() {
-        let parts: Vec<&str> = line.split('\t').collect();
-        let node = parts[0].parse::<u32>().unwrap();
-
-        let edge = parts[1].parse::<u32>().unwrap();
-
-        if let Some(edges_set) = edges.get_mut(&node) {
-            edges_set.insert(edge);
-        } else {
-            if node < min_node {
-                min_node = node;
+    for result in results {
+        if let Ok(output) = result {
+            if let Ok(data) = output.body.collect().await {
+                let bytes = data.to_vec();
+                if let Ok(body_str) = std::str::from_utf8(&bytes) {
+                    for line in body_str.lines() {
+                        if line.trim().is_empty() { continue; }
+                        let mut it = line.split('\t');
+                        let src = it.next().and_then(|s| s.parse::<u32>().ok());
+                        let dst = it.next().and_then(|s| s.parse::<u32>().ok());
+                        if let (Some(s), Some(d)) = (src, dst) {
+                            edges.push((s, d));
+                        }
+                    }
+                }
             }
-            if node > max_node {
-                max_node = node;
-            }
-            let mut edges_set = HashSet::new();
-            edges_set.insert(edge);
-            edges.insert(node, edges_set);
         }
     }
 
-    // println!("{:?}", edges);
-
-    (edges, (min_node, max_node + 1))
-}
-
-fn do_iteration(iter: u32, max_iter: Option<u32>, err: f64, err_threshold: f64) -> bool {
-    if let Some(max_iter) = max_iter {
-        iter < max_iter
-    } else {
-        (err >= err_threshold) && (iter < MAX_ITER)
+    if edges.is_empty() {
+        return (Vec::new(), vec![0; (params.num_nodes + 1) as usize], Vec::new());
     }
+
+    // Sort edges by source node to build CSR
+    edges.sort_unstable_by_key(|e| e.0);
+
+    let mut flat_edges = Vec::with_capacity(edges.len());
+    let mut offsets = vec![0u32; (params.num_nodes + 1) as usize];
+    let mut owned_nodes = Vec::new();
+    
+    if !edges.is_empty() {
+        let mut current_node = edges[0].0;
+        owned_nodes.push(current_node);
+        let mut count = 0;
+        let mut last_offset = 0;
+        
+        for (src, dst) in edges {
+            if src != current_node {
+                // Fill offsets for all nodes between current and src
+                for i in (current_node as usize + 1)..=(src as usize) {
+                    offsets[i] = last_offset + count;
+                }
+                last_offset += count;
+                current_node = src;
+                owned_nodes.push(src);
+                count = 0;
+            }
+            flat_edges.push(dst);
+            count += 1;
+        }
+        // Fill remaining offsets
+        for i in (current_node as usize + 1)..=params.num_nodes as usize {
+            offsets[i] = last_offset + count;
+        }
+    }
+
+    (flat_edges, offsets, owned_nodes)
 }
 
 fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMessage>) -> Output {
@@ -167,10 +200,12 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
         burst_middleware.info.worker_id, params
     );
     // create s3 client
-    let credentials_provider = Credentials::from_keys(
+    let credentials_provider = Credentials::new(
         params.input_data.aws_access_key_id.clone(),
         params.input_data.aws_secret_access_key.clone(),
         params.input_data.aws_session_token.clone(),
+        None,
+        "static",
     );
 
     let config = match params.input_data.endpoint.clone() {
@@ -179,7 +214,7 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
                 .endpoint_url(endpoint)
                 .credentials_provider(credentials_provider)
                 .region(Region::new(params.input_data.region.clone()))
-                .force_path_style(true) // apply bucketname as path param instead of pre-domain
+                .force_path_style(true)
                 .build()
         }
         None => aws_sdk_s3::config::Builder::new()
@@ -189,120 +224,88 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
     };
     let s3_client = S3Client::from_conf(config);
 
-    // create tokio runtime for async s3 requests
     let tokio_runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
 
-    // page_ranks contains the page rank of all nodes, where each index corresponds to the node id
     let init_pagerank = 1.0 / params.num_nodes as f64;
     let mut page_ranks = vec![init_pagerank; params.num_nodes as usize];
     let mut err = f64::MAX;
     let mut iter = 0;
     let mut sum = vec![0.0; params.num_nodes as usize];
-    // graph contains the adjacency matrix of the nodes assigned to this worker
-    let (graph, nodes_range) = tokio_runtime.block_on(get_adjacency_matrix(&params, &s3_client));
-
+    
     timestamps.push(timestamp("get_input".to_string()));
-    println!(
-        "[Worker {}] Graph size: {:?} (range: {:?})",
-        worker,
-        graph.len(),
-        nodes_range
-    );
+    let (flat_edges, offsets, owned_nodes) = tokio_runtime.block_on(load_partition_flat(&params, &s3_client, worker));
+    timestamps.push(timestamp("get_input_end".to_string()));
 
-    // calculate the number of outgoing links for each page of this worker
-    println!("[Worker {}] Calculating outgoing links", worker);
-    let mut out_links = HashMap::new();
-    for i in nodes_range.0..nodes_range.1 {
-        if let Some(edges) = graph.get(&i) {
-            out_links.insert(i, edges.len());
+    println!("[Worker {}] Owned nodes: {}, Edges: {}", worker, owned_nodes.len(), flat_edges.len());
+    
+    let mut inv_out_links = vec![0.0; params.num_nodes as usize];
+    for &node in &owned_nodes {
+        let count = offsets[node as usize + 1] - offsets[node as usize];
+        if count > 0 {
+            inv_out_links[node as usize] = 1.0 / count as f64;
         }
     }
-    // println!("[Worker {}] Outgoing links: {:?}", worker, out_links);
-    timestamps.push(timestamp("calc_outlinks".to_string()));
 
-    while do_iteration(iter, params.iterations, err, params.error) {
+    let iterations = params.iterations.unwrap_or(MAX_ITER);
+    while iter < iterations {
         let iter_t0 = SystemTime::now();
-        println!("[Worker {}] *** Starting iteration {} ***", worker, iter);
-        timestamps.push(timestamp(format!("iter_{}_start", iter)));
 
-        // while iter < MAX_ITER {
         let pr_msg = if burst_middleware.info.worker_id == ROOT_WORKER {
-            println!(
-                "[Worker {}] ROOT --> Broadcast page rank weights to all workers",
-                worker
-            );
             burst_middleware
                 .broadcast(Some(PagerankMessage(page_ranks.clone())), ROOT_WORKER)
                 .unwrap()
         } else {
-            println!(
-                "[Worker {}] Waiting for updated page rank weights...",
-                worker
-            );
-            let weights = burst_middleware.broadcast(None, ROOT_WORKER).unwrap();
-            println!("[Worker {}] Received updated page ranks", worker);
-            weights
+            burst_middleware.broadcast(None, ROOT_WORKER).unwrap()
         };
         page_ranks = pr_msg.0;
 
-        // println!("[Worker {}] Page ranks: {:?}", worker, page_ranks);
         timestamps.push(timestamp(format!("iter_{}_broadcast_weights", iter)));
 
-        for (node, links) in graph.iter() {
-            // println!("[Worker {}] Calculating sum for node {}", worker, node);
-            for link in links.iter() {
-                let link = &(link % params.num_nodes);
-                // println!("{:?}", link);
-                let n_out_links = *out_links.get(node).unwrap_or(&1) as f64;
-                sum[*link as usize] += page_ranks[*node as usize] / n_out_links;
+        // Core PageRank Loop
+        for &node in &owned_nodes {
+            let idx = node as usize;
+            let weight = page_ranks[idx] * inv_out_links[idx];
+            let start = offsets[idx] as usize;
+            let end = offsets[idx + 1] as usize;
+            
+            for i in start..end {
+                let target = flat_edges[i] as usize;
+                if target < sum.len() {
+                    sum[target] += weight;
+                }
             }
         }
 
-        // println!("[Worker {}] Sums: {:?}", worker, sum);
         timestamps.push(timestamp(format!("iter_{}_calc_sums", iter)));
 
-        println!("[Worker {}] Reducing sums", worker);
         let sum_msg = burst_middleware
-            .reduce(PagerankMessage(sum.clone()), |vec1, vec2| {
-                let reduced_sum = vec1
-                    .0
-                    .iter()
-                    .zip(vec2.0.iter())
-                    .map(|(a, b)| a + b)
-                    .collect();
-                PagerankMessage(reduced_sum)
+            .reduce(PagerankMessage(std::mem::take(&mut sum)), |mut vec1, vec2| {
+                for (a, b) in vec1.0.iter_mut().zip(vec2.0.iter()) {
+                    *a += b;
+                }
+                vec1
             })
             .unwrap();
+        
+        sum = vec![0.0; params.num_nodes as usize];
+        
         timestamps.push(timestamp(format!("iter_{}_reduce", iter)));
 
         let new_norm = if let Some(x) = sum_msg {
-            println!("[Worker {}] ROOT --> Received reduced sum", worker);
-            // println!("Reduced sum: {:?}", x.0);
-
-            // Root worker has the reduced sum of all ranks
             let new_page_ranks = x.0;
-            // Calculate the difference between the new and old page ranks, sum the squares and take the square root
             err = new_page_ranks
                 .iter()
                 .zip(page_ranks.iter())
-                .map(|(a, b)| a - b)
-                .map(|x| x * x)
+                .map(|(a, b)| (a - b).powi(2))
                 .sum::<f64>()
                 .sqrt();
 
             page_ranks = new_page_ranks;
-            println!("[Worker {}] ROOT --> New error is {}", worker, err);
-            // println!("Page Ranks: {:?}", page_ranks);
-            println!(
-                "[Worker {}] ROOT --> Broadcast new error to all workers",
-                worker
-            );
             Some(PagerankMessage(vec![err]))
         } else {
-            println!("[Worker {}] Waiting for updated error...", worker);
             None
         };
         timestamps.push(timestamp(format!("iter_{}_calc_err", iter)));
@@ -313,17 +316,12 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
             .0
             .pop()
             .unwrap();
+        
         timestamps.push(timestamp(format!("iter_{}_broadcast_err", iter)));
 
-        // Reset sum vector for the next iteration
-        for val in &mut sum {
-            *val = 0.0;
-        }
-        let iter_t1 = SystemTime::now();
-        let iter_t = iter_t1.duration_since(iter_t0).unwrap().as_secs_f32();
-
+        let iter_t = SystemTime::now().duration_since(iter_t0).unwrap().as_secs_f32();
         println!(
-            "[Worker {}] *** Completed iteration {}, took {:.2} s, err is {} ***",
+            "[Worker {}] Iteration {} took {:.4} s, err={:.6}",
             worker, iter, iter_t, err
         );
 
@@ -331,7 +329,6 @@ fn pagerank(params: Input, burst_middleware: &MiddlewareActorHandle<PagerankMess
         iter += 1;
     }
 
-    println!("[Worker {}] Finished", worker);
     timestamps.push(timestamp("worker_end".to_string()));
     Output {
         bucket: params.input_data.bucket.clone(),
