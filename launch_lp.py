@@ -15,10 +15,10 @@ from ow_client.time_helper import get_millis
 OW_HOST = "localhost"
 OW_PORT = 31001
 LP_ENDPOINT = "http://minio-service.default:9000"
-PARTITIONS = 8
-NUM_NODES = 20
+PARTITIONS = 2
+NUM_NODES = 2000
 BUCKET = "test-bucket"
-KEY = "graphs/deterministic-complex"
+KEY = "large-2000"
 GRANULARITY = 1
 BACKEND = "redis-list"
 CHUNK_SIZE = 1024
@@ -62,7 +62,7 @@ try:
     dt = executor.burst(
         "labelpropagation",
         params,
-        file="labelpropagation.zip",
+        file="/home/sergio/src/tfm/burst-validation/labelpropagation/labelpropagation.zip",
         memory=MEMORY,
         custom_image=CUSTOM_IMAGE,
         debug_mode=True,

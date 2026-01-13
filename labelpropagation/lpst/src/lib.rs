@@ -15,6 +15,94 @@ pub mod graph_generator;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::cmp::Ordering;
+
+const UNKNOWN: u32 = u32::MAX;
+
+fn majority_label(counts: &HashMap<u32, usize>, current: u32) -> u32 {
+    if counts.is_empty() {
+        return current;
+    }
+    let mut best = current;
+    let mut best_count = 0usize;
+    for (label, count) in counts {
+        if *label == UNKNOWN {
+            continue;
+        }
+        match count.cmp(&best_count) {
+            Ordering::Greater => {
+                best = *label;
+                best_count = *count;
+            }
+            Ordering::Equal => {
+                if *label < best {
+                    best = *label;
+                }
+            }
+            Ordering::Less => {}
+        }
+    }
+    best
+}
+
+pub fn run_lp(
+    adj: &HashMap<u32, Vec<u32>>,
+    initial_labels: &HashMap<u32, u32>,
+    num_nodes: u32,
+    max_iter: u32,
+) -> Vec<u32> {
+    let mut labels = vec![UNKNOWN; num_nodes as usize];
+    let unsupervised_mode = initial_labels.is_empty();
+
+    // Inicializar etiquetas (mismo criterio que ow-lp)
+    if unsupervised_mode {
+        for i in 0..num_nodes {
+            labels[i as usize] = i;
+        }
+    } else {
+        for (&node, &label) in initial_labels {
+            if (node as usize) < labels.len() {
+                labels[node as usize] = label;
+            }
+        }
+    }
+
+    for _ in 0..max_iter {
+        let prev_labels = labels.clone(); // Estado consistente al inicio de la iteración
+        let mut changed = 0;
+
+        for i in 0..num_nodes {
+            // Criterio: En modo supervisado, las semillas no cambian (Clamping)
+            if !unsupervised_mode && initial_labels.contains_key(&i) {
+                continue;
+            }
+
+            let current_label = prev_labels[i as usize];
+
+            if let Some(neighbors) = adj.get(&i) {
+                let mut counts = HashMap::new();
+                for &neighbor in neighbors {
+                    let l = prev_labels[neighbor as usize];
+                    if l != UNKNOWN {
+                        *counts.entry(l).or_insert(0) += 1;
+                    }
+                }
+
+                let new_label = majority_label(&counts, current_label);
+                
+                if new_label != current_label {
+                    labels[i as usize] = new_label;
+                    changed += 1;
+                }
+            }
+        }
+
+        if changed == 0 {
+            break;
+        }
+    }
+    labels
+}
 
 /// Represents a single node in the graph
 #[derive(Debug, Clone, Serialize, Deserialize)]

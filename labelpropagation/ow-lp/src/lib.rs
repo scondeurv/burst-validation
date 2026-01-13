@@ -443,11 +443,7 @@ fn label_propagation(
         bucket: params.input_data.bucket.clone(),
         key: format!("worker-{}", worker),
         timestamps,
-        labels: if worker == ROOT_WORKER {
-            Some(global_labels.0)
-        } else {
-            None
-        },
+        labels: None,
     }
 }
 

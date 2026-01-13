@@ -23,6 +23,7 @@ if __name__ == "__main__":
         key=args.key,
         convergence_threshold=args.convergence_threshold,
         max_iterations=args.max_iterations,
+        granularity=args.granularity
     )
 
     executor = OpenwhiskExecutor(args.ow_host, args.ow_port, args.debug)
@@ -34,7 +35,7 @@ if __name__ == "__main__":
                         memory=args.runtime_memory if args.runtime_memory else 4096,
                         custom_image=args.custom_image,
                         debug_mode=args.debug,
-                        burst_size=args.granularity,
+                        burst_size=len(params),
                         join=args.join,
                         backend=args.backend,
                         chunk_size=args.chunk_size,

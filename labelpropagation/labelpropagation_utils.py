@@ -11,17 +11,22 @@ AWS_S3_REGION = "us-east-1"
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "minioadmin")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "minioadmin")
 
-def generate_payload(endpoint, partitions, num_nodes, bucket, key, convergence_threshold=DEFAULT_CONVERGENCE_THRESHOLD, max_iterations=None):
-    payload = []
-    for i in range(partitions):
-        payload.append(
+def generate_payload(endpoint, partitions, num_nodes, bucket, key, convergence_threshold=DEFAULT_CONVERGENCE_THRESHOLD, max_iterations=None, granularity=1):
+    payload_list = []
+    num_requests = partitions // granularity
+    
+    for i in range(num_requests):
+        payload_list.append(
             {
+                "group_id": i,
+                "partitions": partitions,
+                "granularity": granularity,
                 "num_nodes": num_nodes,
                 "convergence_threshold": int(convergence_threshold),
                 **({"max_iterations": max_iterations} if max_iterations is not None else {}),
                 "input_data": {
                     "bucket": bucket,
-                    "key": f"{key}/part-{str(i).zfill(5)}",
+                    "key": key, # Base key, workers will append their id
                     "endpoint": endpoint,
                     "region": AWS_S3_REGION,
                     "aws_access_key_id": AWS_ACCESS_KEY_ID,
@@ -30,7 +35,7 @@ def generate_payload(endpoint, partitions, num_nodes, bucket, key, convergence_t
             }
         )
 
-    return payload
+    return payload_list
 
 def add_labelpropagation_to_parser(parser):
     parser.add_argument("--lp-endpoint", type=str, required=True,
