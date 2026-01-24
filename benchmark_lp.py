@@ -74,6 +74,8 @@ def main():
     parser.add_argument("--granularity", type=int, default=1)
     parser.add_argument("--iter", type=int, default=10)
     parser.add_argument("--memory", type=int, default=512)
+    parser.add_argument("--skip-validation", action="store_true", 
+                       help="Skip correctness validation")
     args = parser.parse_args()
 
     num_nodes = args.nodes
@@ -125,6 +127,31 @@ def main():
             format_char = " (Error)"
         print(f"Speedup:    {speedup:.2f}{format_char}")
         print("========================================\n")
+    
+    # Run validation if not skipped
+    if not args.skip_validation:
+        print("\n========================================")
+        print("   RUNNING CORRECTNESS VALIDATION")
+        print("========================================")
+        
+        validation_cmd = [
+            sys.executable, "labelpropagation/validate_results.py",
+            "--num-communities", "4",
+            "--nodes-per-community", "100",
+            "--num-workers", str(partitions),
+            "--output", "validation_report.html"
+        ]
+        
+        result = subprocess.run(validation_cmd)
+        
+        if result.returncode != 0:
+            print("\n✗ Validation FAILED - see validation_report.html for details")
+            sys.exit(1)
+        else:
+            print("\n✓ Validation PASSED")
+    else:
+        print("\n[Validation skipped]")
 
 if __name__ == "__main__":
     main()
+
