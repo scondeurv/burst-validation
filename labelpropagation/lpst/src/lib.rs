@@ -409,4 +409,171 @@ mod tests {
         assert_eq!(result.labels.len(), 3);
         assert!(result.converged);
     }
+
+    #[test]
+    fn test_triangle_graph() {
+        // Triangle: todos conectados 0-1-2-0
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![0, 1]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 5);
+
+        let result = run_lp(&adj, &initial_labels, 3, 10);
+
+        assert_eq!(result[0], 5, "Node 0 should keep seed label 5");
+        assert_eq!(result[1], 5, "Node 1 should adopt label 5");
+        assert_eq!(result[2], 5, "Node 2 should adopt label 5");
+    }
+
+    #[test]
+    fn test_star_graph() {
+        // Star: Centro (0) conectado a 4 radios
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2, 3, 4]);
+        adj.insert(1, vec![0]);
+        adj.insert(2, vec![0]);
+        adj.insert(3, vec![0]);
+        adj.insert(4, vec![0]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 10);
+
+        let result = run_lp(&adj, &initial_labels, 5, 10);
+
+        assert_eq!(result[0], 10, "Center should keep label 10");
+        assert_eq!(result[1], 10, "Spoke 1 should adopt label 10");
+        assert_eq!(result[2], 10, "Spoke 2 should adopt label 10");
+        assert_eq!(result[3], 10, "Spoke 3 should adopt label 10");
+        assert_eq!(result[4], 10, "Spoke 4 should adopt label 10");
+    }
+
+    #[test]
+    fn test_line_graph() {
+        // Line: 0-1-2-3-4 con seeds en extremos
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![1, 3]);
+        adj.insert(3, vec![2, 4]);
+        adj.insert(4, vec![3]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 100);
+        initial_labels.insert(4, 200);
+
+        let result = run_lp(&adj, &initial_labels, 5, 10);
+
+        assert_eq!(result[0], 100, "Node 0 should keep seed label 100");
+        assert_eq!(result[4], 200, "Node 4 should keep seed label 200");
+        
+        // Nodos intermedios deben tener una de las dos etiquetas
+        assert!(result[1] == 100 || result[1] == 200);
+        assert!(result[2] == 100 || result[2] == 200);
+        assert!(result[3] == 100 || result[3] == 200);
+    }
+
+    #[test]
+    fn test_disconnected_components() {
+        // Dos componentes separados
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![0, 1]);
+        adj.insert(3, vec![4, 5]);
+        adj.insert(4, vec![3, 5]);
+        adj.insert(5, vec![3, 4]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 10);
+        initial_labels.insert(3, 20);
+
+        let result = run_lp(&adj, &initial_labels, 6, 10);
+
+        // Componente 1: todos deben ser 10
+        assert_eq!(result[0], 10);
+        assert_eq!(result[1], 10);
+        assert_eq!(result[2], 10);
+
+        // Componente 2: todos deben ser 20
+        assert_eq!(result[3], 20);
+        assert_eq!(result[4], 20);
+        assert_eq!(result[5], 20);
+    }
+
+    #[test]
+    fn test_unsupervised_mode() {
+        // Modo no supervisado: sin seeds
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![0, 1]);
+
+        let initial_labels = HashMap::new();
+
+        let result = run_lp(&adj, &initial_labels, 3, 10);
+
+        // Todos convergen a la etiqueta más pequeña (0)
+        assert_eq!(result[0], 0);
+        assert_eq!(result[1], 0);
+        assert_eq!(result[2], 0);
+    }
+
+    #[test]
+    fn test_determinism() {
+        // Ejecutar dos veces debe producir resultados idénticos
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2, 3]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![0, 1, 3]);
+        adj.insert(3, vec![0, 2]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 7);
+
+        let result1 = run_lp(&adj, &initial_labels, 4, 10);
+        let result2 = run_lp(&adj, &initial_labels, 4, 10);
+
+        assert_eq!(result1, result2, "Algorithm should be deterministic");
+    }
+
+    #[test]
+    fn test_convergence() {
+        // Con suficientes iteraciones, resultado debe ser estable
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![1, 2]);
+        adj.insert(1, vec![0, 2]);
+        adj.insert(2, vec![0, 1]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 42);
+
+        let result_few = run_lp(&adj, &initial_labels, 3, 3);
+        let result_many = run_lp(&adj, &initial_labels, 3, 100);
+
+        assert_eq!(result_few, result_many, "Should converge quickly");
+    }
+
+    #[test]
+    fn test_tie_breaking() {
+        // Test para verificar tie-breaking determinístico
+        let mut adj = HashMap::new();
+        adj.insert(0, vec![2]);
+        adj.insert(1, vec![2]);
+        adj.insert(2, vec![0, 1]);
+
+        let mut initial_labels = HashMap::new();
+        initial_labels.insert(0, 50);
+        initial_labels.insert(1, 30);
+
+        let result = run_lp(&adj, &initial_labels, 3, 5);
+
+        assert_eq!(result[0], 50);
+        assert_eq!(result[1], 30);
+        // Node 2 tiene empate (1 voto para 50, 1 para 30)
+        // Debe elegir la más pequeña (30)
+        assert_eq!(result[2], 30, "Should break tie by choosing smallest label");
+    }
 }

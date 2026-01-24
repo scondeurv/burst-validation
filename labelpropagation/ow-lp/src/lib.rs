@@ -545,3 +545,209 @@ pub fn main(args: Value, burst_middleware: Middleware<LabelsMessage>) -> Result<
     let result = label_propagation(input, &handle);
     serde_json::to_value(result)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Helper para crear un grafo simple y ejecutar LP localmente (sin S3, sin middleware)
+    fn run_lp_local(
+        edges: Vec<(u32, u32, Option<u32>)>, // (src, dst, optional_label)
+        num_nodes: u32,
+        max_iter: u32,
+    ) -> Vec<u32> {
+        // Construir grafo CSR
+        let mut owned_nodes = Vec::new();
+        let mut offsets = vec![0u32; (num_nodes + 1) as usize];
+        let mut flat_edges = Vec::new();
+        
+        // Agrupar edges por nodo origen
+        let mut adj: HashMap<u32, Vec<u32>> = HashMap::default();
+        let mut seeds: HashMap<u32, u32> = HashMap::default();
+        
+        for (src, dst, label) in edges {
+            adj.entry(src).or_insert_with(Vec::new).push(dst);
+            if let Some(l) = label {
+                seeds.insert(src, l);
+            }
+        }
+        
+        // Convertir a CSR
+        for node in 0..num_nodes {
+            if let Some(neighbors) = adj.get(&node) {
+                owned_nodes.push(node);
+                offsets[node as usize] = flat_edges.len() as u32;
+                flat_edges.extend_from_slice(neighbors);
+            }
+        }
+        offsets[num_nodes as usize] = flat_edges.len() as u32;
+        
+        // Inicializar labels
+        let unsupervised = seeds.is_empty();
+        let mut labels = vec![UNKNOWN; num_nodes as usize];
+        
+        if unsupervised {
+            for i in 0..num_nodes {
+                labels[i as usize] = i;
+            }
+        } else {
+            for (&node, &label) in &seeds {
+                labels[node as usize] = label;
+            }
+        }
+        
+        // Ejecutar iteraciones de LP
+        for _ in 0..max_iter {
+            let prev_labels = labels.clone();
+            let mut changed = 0;
+            
+            for &node in &owned_nodes {
+                if !unsupervised && seeds.contains_key(&node) {
+                    continue; // Clamping
+                }
+                
+                let start = offsets[node as usize] as usize;
+                let end = offsets[(node + 1) as usize] as usize;
+                let neighbors = &flat_edges[start..end];
+                
+                let mut counts: HashMap<u32, usize> = HashMap::default();
+                for &neighbor in neighbors {
+                    let l = prev_labels[neighbor as usize];
+                    if l != UNKNOWN {
+                        *counts.entry(l).or_insert(0) += 1;
+                    }
+                }
+                
+                if counts.is_empty() {
+                    continue;
+                }
+                
+                // Majority vote con tie-breaking
+                let mut best = prev_labels[node as usize];
+                let mut best_count = 0usize;
+                
+                for (&label, &count) in &counts {
+                    if label == UNKNOWN {
+                        continue;
+                    }
+                    match count.cmp(&best_count) {
+                        Ordering::Greater => {
+                            best = label;
+                            best_count = count;
+                        }
+                        Ordering::Equal => {
+                            if label < best {
+                                best = label;
+                            }
+                        }
+                        Ordering::Less => {}
+                    }
+                }
+                
+                if best != prev_labels[node as usize] {
+                    labels[node as usize] = best;
+                    changed += 1;
+                }
+            }
+            
+            if changed == 0 {
+                break;
+            }
+        }
+        
+        labels
+    }
+
+    #[test]
+    fn test_triangle_graph() {
+        let edges = vec![
+            (0, 1, Some(100)),
+            (0, 2, Some(100)),
+            (1, 0, None),
+            (1, 2, None),
+            (2, 0, None),
+            (2, 1, None),
+        ];
+        
+        let result = run_lp_local(edges, 3, 10);
+        
+        assert_eq!(result[0], 100);
+        assert_eq!(result[1], 100);
+        assert_eq!(result[2], 100);
+    }
+
+    #[test]
+    fn test_star_graph() {
+        let edges = vec![
+            (0, 1, Some(42)),
+            (0, 2, Some(42)),
+            (0, 3, Some(42)),
+            (0, 4, Some(42)),
+            (1, 0, None),
+            (2, 0, None),
+            (3, 0, None),
+            (4, 0, None),
+        ];
+        
+        let result = run_lp_local(edges, 5, 10);
+        
+        assert_eq!(result[0], 42);
+        assert_eq!(result[1], 42);
+        assert_eq!(result[2], 42);
+        assert_eq!(result[3], 42);
+        assert_eq!(result[4], 42);
+    }
+
+    #[test]
+    fn test_unsupervised_triangle() {
+        let edges = vec![
+            (0, 1, None),
+            (0, 2, None),
+            (1, 0, None),
+            (1, 2, None),
+            (2, 0, None),
+            (2, 1, None),
+        ];
+        
+        let result = run_lp_local(edges, 3, 10);
+        
+        // Todos deben converger a 0 (la etiqueta más pequeña)
+        assert_eq!(result[0], 0);
+        assert_eq!(result[1], 0);
+        assert_eq!(result[2], 0);
+    }
+
+    #[test]
+    fn test_deterministic() {
+        let edges = vec![
+            (0, 1, Some(7)),
+            (0, 2, None),
+            (1, 0, None),
+            (1, 2, None),
+            (2, 0, None),
+            (2, 1, None),
+        ];
+        
+        let result1 = run_lp_local(edges.clone(), 3, 10);
+        let result2 = run_lp_local(edges, 3, 10);
+        
+        assert_eq!(result1, result2);
+    }
+
+    #[test]
+    fn test_tie_breaking() {
+        let edges = vec![
+            (0, 2, Some(50)),
+            (1, 2, Some(30)),
+            (2, 0, None),
+            (2, 1, None),
+        ];
+        
+        let result = run_lp_local(edges, 3, 5);
+        
+        assert_eq!(result[0], 50);
+        assert_eq!(result[1], 30);
+        // Nodo 2 tiene empate, debe elegir la más pequeña
+        assert_eq!(result[2], 30);
+    }
+}
