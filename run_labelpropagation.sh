@@ -22,14 +22,15 @@ PYTHONPATH=. uv run labelpropagation/labelpropagation.py \
   --ow-port 31001 \
   --lp-endpoint http://minio-service.default:9000 \
   --partitions 8 \
-  --num-nodes 20 \
+  --num-nodes 10000 \
   --bucket test-bucket \
-  --key graphs/deterministic-complex\
-  --granularity 8 \
+  --key graphs/cluster-test \
+  --granularity 1 \
   --backend redis-list \
   --chunk-size 1024 \
   --max-iterations 10 \
-  --convergence-threshold 0
+  --convergence-threshold 0 \
+  --runtime-memory 512
 
 LP_EXIT_CODE=$?
 

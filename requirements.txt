@@ -7,3 +7,4 @@ click==8.1.7
 requests==2.31.0
 colorlog==6.7.0
 matplotlib==3.7.1
+minio
