@@ -66,7 +66,7 @@ try:
         memory=MEMORY,
         custom_image=CUSTOM_IMAGE,
         debug_mode=True,
-        burst_size=GRANULARITY,
+        burst_size=1,
         join=False,
         backend=BACKEND,
         chunk_size=CHUNK_SIZE,
