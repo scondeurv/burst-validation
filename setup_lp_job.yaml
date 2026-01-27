@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup-lp-data
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - name: setup
+        image: python:3.11-slim
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            pip install -q boto3 &&
+            python3 /scripts/setup_lp_data_communities.py \
+              --nodes 1000 \
+              --communities 4 \
+              --partitions 8 \
+              --seed-ratio 0.1
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      volumes:
+      - name: scripts
+        configMap:
+          name: lp-setup-script
+      restartPolicy: Never
+  backoffLimit: 1

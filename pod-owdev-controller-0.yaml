@@ -1,0 +1,485 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2026-01-25T21:17:09Z"
+  generateName: owdev-controller-
+  generation: 1
+  labels:
+    app: owdev-openwhisk
+    apps.kubernetes.io/pod-index: "0"
+    chart: openwhisk-1.0.1
+    controller-revision-hash: owdev-controller-684669d78b
+    heritage: Helm
+    name: owdev-controller
+    release: owdev
+    statefulset.kubernetes.io/pod-name: owdev-controller-0
+  name: owdev-controller-0
+  namespace: openwhisk
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: StatefulSet
+    name: owdev-controller
+    uid: 9fb7e74d-8847-4336-beac-eca08e5e5b9e
+  resourceVersion: "6022"
+  uid: 7a4b6b60-b096-4bc2-9b06-8cb122ea2b24
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - preference:
+          matchExpressions:
+          - key: openwhisk-role
+            operator: NotIn
+            values:
+            - invoker
+        weight: 100
+      - preference:
+          matchExpressions:
+          - key: openwhisk-role
+            operator: In
+            values:
+            - core
+        weight: 80
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: name
+            operator: In
+            values:
+            - owdev-controller
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - command:
+    - /bin/bash
+    - -c
+    - /init.sh `hostname | awk -F '-' '{print $NF}'`
+    env:
+    - name: BURST_STANDALONE
+      value: "true"
+    - name: PORT
+      value: "8080"
+    - name: TZ
+      value: UTC
+    - name: POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
+    - name: CONFIG_whisk_info_date
+      valueFrom:
+        configMapKeyRef:
+          key: whisk_info_date
+          name: owdev-whisk.config
+    - name: CONFIG_whisk_info_buildNo
+      valueFrom:
+        configMapKeyRef:
+          key: whisk_info_buildNo
+          name: owdev-whisk.config
+    - name: JAVA_OPTS
+      value: '-Xmx4096M '
+    - name: CONTROLLER_OPTS
+      value: ' '
+    - name: RUNTIMES_MANIFEST
+      value: |
+        {
+            "runtimes": {
+            "nodejs": [
+                    {
+                        "kind": "nodejs:14",
+                        "default": true,
+                        "image": {
+                            "prefix": "openwhisk",
+                            "name": "action-nodejs-v14",
+                            "tag": "1.20.0"
+                        },
+                        "deprecated": false,
+                        "attached": {
+                            "attachmentName": "codefile",
+                            "attachmentType": "text/plain"
+                        },
+                        "stemCells": [
+                            {
+                                "initialCount": 2,
+                                "memory": "256 MB",
+                                "reactive": {
+                                    "minCount": 1,
+                                    "maxCount": 4,
+                                    "ttl": "2 minutes",
+                                    "threshold": 1,
+                                    "increment": 1
+                                }
+                            }
+                        ]
+                    }
+            ]
+            },
+            "blackboxes": [
+                {
+                    "prefix": "openwhisk",
+                    "name": "dockerskeleton",
+                    "tag": "1.14.0"
+                }
+            ]
+        }
+    - name: LIMITS_ACTIONS_INVOKES_PERMINUTE
+      value: "1000"
+    - name: LIMITS_ACTIONS_INVOKES_CONCURRENT
+      value: "1000"
+    - name: LIMITS_TRIGGERS_FIRES_PERMINUTE
+      value: "60"
+    - name: LIMITS_ACTIONS_SEQUENCE_MAXLENGTH
+      value: "50"
+    - name: CONFIG_whisk_timeLimit_min
+      value: 100ms
+    - name: CONFIG_whisk_timeLimit_max
+      value: 10m
+    - name: CONFIG_whisk_timeLimit_std
+      value: 1m
+    - name: CONFIG_whisk_memory_min
+      value: 16m
+    - name: CONFIG_whisk_memory_max
+      value: 120000m
+    - name: CONFIG_whisk_memory_std
+      value: 256m
+    - name: CONFIG_whisk_concurrencyLimit_min
+      value: "1"
+    - name: CONFIG_whisk_concurrencyLimit_max
+      value: "1"
+    - name: CONFIG_whisk_concurrencyLimit_std
+      value: "1"
+    - name: CONFIG_whisk_logLimit_min
+      value: 0m
+    - name: CONFIG_whisk_logLimit_max
+      value: 10m
+    - name: CONFIG_whisk_logLimit_std
+      value: 10m
+    - name: CONFIG_whisk_activation_payload_max
+      value: "1048576"
+    - name: CONFIG_whisk_loadbalancer_blackboxFraction
+      value: 100%
+    - name: CONFIG_whisk_loadbalancer_timeoutFactor
+      value: "2"
+    - name: KAFKA_HOSTS
+      value: owdev-kafka-0.owdev-kafka.openwhisk.svc.cluster.local:9092
+    - name: CONFIG_whisk_kafka_replicationFactor
+    - name: CONFIG_whisk_kafka_topics_prefix
+    - name: CONFIG_whisk_kafka_topics_cacheInvalidation_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_cacheInvalidation_retentionMs
+    - name: CONFIG_whisk_kafka_topics_cacheInvalidation_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_completed_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_completed_retentionMs
+    - name: CONFIG_whisk_kafka_topics_completed_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_events_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_events_retentionMs
+    - name: CONFIG_whisk_kafka_topics_events_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_health_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_health_retentionMs
+    - name: CONFIG_whisk_kafka_topics_health_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_invoker_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_invoker_retentionMs
+    - name: CONFIG_whisk_kafka_topics_invoker_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_scheduler_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_scheduler_retentionMs
+    - name: CONFIG_whisk_kafka_topics_scheduler_segmentBytes
+    - name: CONFIG_whisk_kafka_topics_creationAck_retentionBytes
+    - name: CONFIG_whisk_kafka_topics_creationAck_retentionMs
+    - name: CONFIG_whisk_kafka_topics_creationAck_segmentBytes
+    - name: CONFIG_whisk_burstMiddleware_rabbitmq_uri
+      value: amqp://guest:guest@rabbitmq.default.svc.cluster.local:5672
+    - name: CONFIG_whisk_burstMiddleware_redisList_uri
+      value: redis://dragonfly.default.svc.cluster.local:6379
+    - name: CONFIG_whisk_burstMiddleware_redisStream_uri
+      value: redis://dragonfly.default.svc.cluster.local:6379
+    - name: CONFIG_whisk_burstMiddleware_messageRelay
+      value: foo
+    - name: CONFIG_whisk_burstMiddleware_s3_uri
+      value: foo
+    - name: CONFIG_whisk_burstMiddleware_s3_bucket
+    - name: CONFIG_whisk_burstMiddleware_s3_region
+      value: foo
+    - name: CONFIG_whisk_burstMiddleware_s3_accessKeyId
+      value: foo
+    - name: CONFIG_whisk_burstMiddleware_s3_secretAccessKey
+      value: foo
+    - name: CONFIG_whisk_burstMiddleware_s3_sessionToken
+      value: foo
+    - name: CONFIG_whisk_couchdb_username
+      valueFrom:
+        secretKeyRef:
+          key: db_username
+          name: owdev-db.auth
+    - name: CONFIG_whisk_couchdb_password
+      valueFrom:
+        secretKeyRef:
+          key: db_password
+          name: owdev-db.auth
+    - name: CONFIG_whisk_couchdb_port
+      valueFrom:
+        configMapKeyRef:
+          key: db_port
+          name: owdev-db.config
+    - name: CONFIG_whisk_couchdb_protocol
+      valueFrom:
+        configMapKeyRef:
+          key: db_protocol
+          name: owdev-db.config
+    - name: CONFIG_whisk_couchdb_host
+      value: owdev-couchdb.openwhisk.svc.cluster.local
+    - name: CONFIG_whisk_couchdb_provider
+      valueFrom:
+        configMapKeyRef:
+          key: db_provider
+          name: owdev-db.config
+    - name: CONFIG_whisk_couchdb_databases_WhiskActivation
+      valueFrom:
+        configMapKeyRef:
+          key: db_whisk_activations
+          name: owdev-db.config
+    - name: CONFIG_whisk_couchdb_databases_WhiskEntity
+      valueFrom:
+        configMapKeyRef:
+          key: db_whisk_actions
+          name: owdev-db.config
+    - name: CONFIG_whisk_couchdb_databases_WhiskAuth
+      valueFrom:
+        configMapKeyRef:
+          key: db_whisk_auths
+          name: owdev-db.config
+    - name: CONTROLLER_INSTANCES
+      value: "1"
+    - name: CONFIG_akka_cluster_seedNodes_0
+      value: akka://controller-actor-system@$(POD_IP):25520
+    - name: CONFIG_logback_log_level
+      value: INFO
+    image: manriurv/controller:classic
+    imagePullPolicy: Always
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /ping
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: controller
+    ports:
+    - containerPort: 8080
+      name: controller
+      protocol: TCP
+    - containerPort: 25520
+      name: akka-remoting
+      protocol: TCP
+    - containerPort: 19999
+      name: akka-mgmt-http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /ping
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: owdev-controller-0
+  initContainers:
+  - command:
+    - sh
+    - -c
+    - 'cacert="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"; token="$(cat
+      /var/run/secrets/kubernetes.io/serviceaccount/token)"; while true; do rc=$(curl
+      -sS --cacert $cacert --header "Authorization: Bearer $token" https://kubernetes.default.svc/api/v1/namespaces/openwhisk/endpoints/owdev-kafka
+      | jq -r ".subsets[].addresses | length"); echo "num ready kafka endpoints is
+      $rc"; if [ $rc -gt 0 ]; then echo "Success: ready kafka endpoint!"; break; fi;
+      echo "kafka not ready yet; sleeping for 3 seconds"; sleep 3; done;'
+    image: openwhisk/ow-utils:1.0.0
+    imagePullPolicy: IfNotPresent
+    name: wait-for-kafka
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+  - command:
+    - sh
+    - -c
+    - 'while true; do echo ''checking CouchDB readiness''; wget -T 5 --spider $READINESS_URL
+      --header="Authorization: Basic d2hpc2tfYWRtaW46c29tZV9wYXNzdzByZA=="; result=$?;
+      if [ $result -eq 0 ]; then echo ''Success: CouchDB is ready!''; break; fi; echo
+      ''...not ready yet; sleeping 3 seconds before retry''; sleep 3; done;'
+    env:
+    - name: READINESS_URL
+      value: http://owdev-couchdb.openwhisk.svc.cluster.local:5984/ow_kube_couchdb_initialized_marker
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    name: wait-for-couchdb
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+  nodeName: minikube
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: owdev-core
+  serviceAccountName: owdev-core
+  subdomain: owdev-controller
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoSchedule
+    key: openwhisk-role
+    operator: Equal
+    value: core
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-bxl64
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-01-27T17:23:48Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-01-25T21:17:47Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-01-27T17:24:29Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-01-27T17:24:29Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-01-25T21:17:09Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://3fc80a1c0aece5622718a6b690daaa97230f8366f4cc9ace1b5d0e4e75615f3c
+    image: docker.io/manriurv/controller:classic
+    imageID: docker.io/manriurv/controller@sha256:59347f02f1224c9bfc4c7b2a6570ce57c3a077f42bef98b622610ee2ee9f4c30
+    lastState:
+      terminated:
+        containerID: containerd://a4a6ff9ac635d0e62fe97fb90e17c619c860c2ca17eb284f4d056839648bec2b
+        exitCode: 255
+        finishedAt: "2026-01-27T17:23:37Z"
+        reason: Unknown
+        startedAt: "2026-01-25T21:24:13Z"
+    name: controller
+    ready: true
+    resources: {}
+    restartCount: 3
+    started: true
+    state:
+      running:
+        startedAt: "2026-01-27T17:24:17Z"
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 192.168.49.2
+  hostIPs:
+  - ip: 192.168.49.2
+  initContainerStatuses:
+  - containerID: containerd://512d15535a75050fcf3a589bc7eac63ca9a76403c87ffc8b054e386a30f7b3aa
+    image: docker.io/openwhisk/ow-utils:1.0.0
+    imageID: docker.io/openwhisk/ow-utils@sha256:c80dba0de3aa965db9eb2ef282818608d3fb33b52c14bd0b77b74abb379b57b0
+    lastState: {}
+    name: wait-for-kafka
+    ready: true
+    resources: {}
+    restartCount: 2
+    started: false
+    state:
+      terminated:
+        containerID: containerd://512d15535a75050fcf3a589bc7eac63ca9a76403c87ffc8b054e386a30f7b3aa
+        exitCode: 0
+        finishedAt: "2026-01-27T17:24:14Z"
+        reason: Completed
+        startedAt: "2026-01-27T17:23:47Z"
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+      recursiveReadOnly: Disabled
+  - containerID: containerd://bb138c7cbaf7d21cd5f4e61a747ac8f2b6a2ca77e6c0d2adf353c92f9a741271
+    image: docker.io/library/busybox:latest
+    imageID: docker.io/library/busybox@sha256:e226d6308690dbe282443c8c7e57365c96b5228f0fe7f40731b5d84d37a06839
+    lastState: {}
+    name: wait-for-couchdb
+    ready: true
+    resources: {}
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://bb138c7cbaf7d21cd5f4e61a747ac8f2b6a2ca77e6c0d2adf353c92f9a741271
+        exitCode: 0
+        finishedAt: "2026-01-27T17:24:15Z"
+        reason: Completed
+        startedAt: "2026-01-27T17:24:15Z"
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bxl64
+      readOnly: true
+      recursiveReadOnly: Disabled
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.244.0.23
+  podIPs:
+  - ip: 10.244.0.23
+  qosClass: BestEffort
+  startTime: "2026-01-25T21:17:09Z"

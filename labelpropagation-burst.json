@@ -1,0 +1,1762 @@
+[
+    {
+        "fn_id": "worker-0",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548813004"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548813008"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548813010"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            },
+            {
+                "key": "write_labels_start",
+                "value": "1769548820247"
+            },
+            {
+                "key": "write_labels_end",
+                "value": "1769548820267"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-1",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548815083"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548815088"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548815090"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-2",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548812004"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548812008"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548812010"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-3",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548818185"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548818189"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548818191"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-4",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548820226"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548820231"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548820233"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-5",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548817106"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548817110"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548817112"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-6",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548810944"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548810947"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548810949"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820235"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820247"
+            }
+        ],
+        "finished": 1769548823713
+    },
+    {
+        "fn_id": "worker-7",
+        "host_submit": 1769548806812,
+        "timestamps": [
+            {
+                "key": "worker_start",
+                "value": "1769548816139"
+            },
+            {
+                "key": "get_input",
+                "value": "1769548816143"
+            },
+            {
+                "key": "get_input_end",
+                "value": "1769548816145"
+            },
+            {
+                "key": "iter_0_start",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_compute",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_reduce_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_0_broadcast_labels",
+                "value": "1769548820236"
+            },
+            {
+                "key": "iter_1_end",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_start",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_compute",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_reduce_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_1_broadcast_labels",
+                "value": "1769548820237"
+            },
+            {
+                "key": "iter_2_end",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_start",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_compute",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_reduce_labels",
+                "value": "1769548820238"
+            },
+            {
+                "key": "iter_2_broadcast_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_end",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_start",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_compute",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_reduce_labels",
+                "value": "1769548820239"
+            },
+            {
+                "key": "iter_3_broadcast_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_end",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_start",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_compute",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_reduce_labels",
+                "value": "1769548820240"
+            },
+            {
+                "key": "iter_4_broadcast_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_end",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_start",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_compute",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_reduce_labels",
+                "value": "1769548820241"
+            },
+            {
+                "key": "iter_5_broadcast_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_end",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_start",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_compute",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_reduce_labels",
+                "value": "1769548820242"
+            },
+            {
+                "key": "iter_6_broadcast_labels",
+                "value": "1769548820243"
+            },
+            {
+                "key": "iter_7_end",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_start",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_compute",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_reduce_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_7_broadcast_labels",
+                "value": "1769548820244"
+            },
+            {
+                "key": "iter_8_end",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_start",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_compute",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_reduce_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_8_broadcast_labels",
+                "value": "1769548820245"
+            },
+            {
+                "key": "iter_9_end",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_start",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_compute",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_reduce_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "iter_9_broadcast_labels",
+                "value": "1769548820246"
+            },
+            {
+                "key": "worker_end",
+                "value": "1769548820249"
+            }
+        ],
+        "finished": 1769548823713
+    }
+]

@@ -33,7 +33,8 @@ fn main() {
     let result = serde_json::json!({
         "load_time_ms": load_duration.as_millis(),
         "execution_time_ms": lp_duration.as_millis(),
-        "total_time_ms": (load_duration + lp_duration).as_millis()
+        "total_time_ms": (load_duration + lp_duration).as_millis(),
+        "labels": labels
     });
 
     println!("{}", result.to_string());

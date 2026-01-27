@@ -30,7 +30,7 @@ PYTHONPATH=. uv run labelpropagation/labelpropagation.py \
   --chunk-size 1024 \
   --max-iterations 10 \
   --convergence-threshold 0 \
-  --runtime-memory 512
+  --runtime-memory 2048
 
 LP_EXIT_CODE=$?
 

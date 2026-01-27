@@ -23,8 +23,16 @@ for nodes in "${SIZES[@]}"; do
     # Repackage action
     zip -j labelpropagation.zip labelpropagation/ow-lp/bin/exec > /dev/null 2>&1
     
-    # Run benchmark
-    output=$(PYTHONPATH=. uv run benchmark_lp.py --nodes "$nodes" --partitions 32 --iter 5 --memory "$MEMORY" 2>&1)
+    # Run benchmark with validation
+    output=$(PYTHONPATH=. uv run benchmark_lp.py --nodes "$nodes" --partitions 32 --iter 5 \
+        --memory "$MEMORY" --validate --bucket test-bucket --key-prefix "graphs" 2>&1)
+    
+    # Check if validation failed
+    if echo "$output" | grep -q "VALIDATION FAILED"; then
+        echo "✗ VALIDATION FAILED for $nodes nodes!"
+        echo "$output" | grep -A 10 "VALIDATION"
+        exit 1
+    fi
     
     # Extract timing values
     lpst_time=$(echo "$output" | grep "LPST Time:" | awk '{print $3}')

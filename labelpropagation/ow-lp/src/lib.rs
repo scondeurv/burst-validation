@@ -58,6 +58,9 @@ struct Output {
     /// Optional labels (usually skipped in final output for performance)
     #[serde(skip_serializing_if = "Option::is_none")]
     labels: Option<Vec<u32>>,
+    /// Results report (only for root worker)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    results: Option<String>,
 }
 
 /// A simple key-value pair for logging execution events with timestamps
@@ -155,7 +158,7 @@ async fn load_partition_flat(
     // Fetch Multiple partitions in parallel
     let mut fetch_futures = Vec::new();
     for p in start_part..end_part {
-        let part_key = format!("{}/part-{}", params.input_data.key, p);
+        let part_key = format!("{}/part-{:05}", params.input_data.key, p);
         fetch_futures.push(async move {
             s3_client
                 .get_object()
@@ -521,11 +524,84 @@ fn label_propagation(
     }
 
     timestamps.push(timestamp("worker_end"));
+
+    // Determine which buffer contains the final labels
+    let final_labels = if use_a_as_read {
+        &labels_a
+    } else {
+        &labels_b
+    };
+
+    // Worker 0 writes final labels to S3 for validation and generates results report
+    let results_report = if worker == ROOT_WORKER {
+        timestamps.push(timestamp("write_labels_start"));
+        
+        let labels_map: std::collections::HashMap<String, u32> = (0..params.num_nodes)
+            .map(|i| (i.to_string(), final_labels[i as usize]))
+            .collect();
+        
+        // Generate label distribution
+        let mut label_counts: std::collections::HashMap<u32, usize> = std::collections::HashMap::new();
+        for &label in final_labels.iter() {
+            *label_counts.entry(label).or_insert(0) += 1;
+        }
+        
+        let mut report = String::new();
+        report.push_str("\n=== Label Propagation Results ===\n");
+        report.push_str(&format!("Total nodes: {}\n", params.num_nodes));
+        report.push_str(&format!("Total iterations: {}\n", iter));
+        report.push_str("\nLabel Distribution:\n");
+        let mut sorted_labels: Vec<_> = label_counts.iter().collect();
+        sorted_labels.sort_by_key(|&(label, _)| label);
+        for (label, count) in sorted_labels.iter().take(20) {
+            if **label == UNKNOWN {
+                report.push_str(&format!("  UNKNOWN: {} nodes\n", count));
+            } else {
+                report.push_str(&format!("  Label {}: {} nodes\n", label, count));
+            }
+        }
+        
+        // Add sample of nodes
+        report.push_str("\nSample nodes (first 20):\n");
+        for i in 0..20.min(params.num_nodes as usize) {
+            let label = final_labels[i];
+            let label_str = if label == UNKNOWN { "UNKNOWN".to_string() } else { label.to_string() };
+            report.push_str(&format!("  Node {}: Label {}\n", i, label_str));
+        }
+        report.push_str("=================================\n");
+        
+        println!("{}", report);
+        
+        let labels_json = serde_json::json!({ "labels": labels_map });
+        let labels_str = serde_json::to_string(&labels_json).unwrap();
+        
+        let output_key = format!("{}/output/labels_final.json", params.input_data.key);
+        let write_result = rt.block_on(async {
+            s3_client.put_object()
+                .bucket(&params.input_data.bucket)
+                .key(&output_key)
+                .body(labels_str.into_bytes().into())
+                .send()
+                .await
+        });
+        
+        match write_result {
+            Ok(_) => println!("[Worker {}] ✓ Wrote final labels to s3://{}/{}", worker, params.input_data.bucket, output_key),
+            Err(e) => eprintln!("[Worker {}] ✗ Failed to write labels: {:?}", worker, e),
+        }
+        
+        timestamps.push(timestamp("write_labels_end"));
+        Some(report)
+    } else {
+        None
+    };
+
     Output {
         bucket: params.input_data.bucket.clone(),
         key: format!("worker-{}", worker),
         timestamps,
         labels: None,
+        results: results_report,
     }
 }
 

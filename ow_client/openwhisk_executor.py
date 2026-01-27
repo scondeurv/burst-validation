@@ -32,7 +32,7 @@ class OpenwhiskExecutor:
 
     def burst(self, action_name, params_list, file, is_zip=False, memory=256, debug_mode=False, custom_image=None,
               backend="rabbitmq",
-              burst_size=None, chunk_size=None, join=False, timeout=60000) -> ResultDataset:
+              burst_size=None, chunk_size=None, join=False, timeout=900000) -> ResultDataset:
         """
         Function to invoke a burst of actions
         :param action_name: the name of the action to invoke. Action must be located into functions folder.
@@ -112,7 +112,7 @@ class OpenwhiskExecutor:
 
         response = self.session.put(
             f"{self.protocol}://{self.host}:{self.port}/api/v1/namespaces/guest/actions/{action_name}?overwrite=true",
-            json=action_data)
+            json=action_data, timeout=300)
 
         if response.status_code == 200:
             logger.info(f"Function {action_name} created in Openwhisk successfully")

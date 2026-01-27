@@ -42,7 +42,7 @@ def generate_and_upload_graph(endpoint, access_key, secret_key, bucket, key_pref
     # Subir particiones
     for i, buf in enumerate(partitions):
         data = buf.getvalue().encode('utf-8')
-        object_name = f"{key_prefix}/part-{i}"
+        object_name = f"{key_prefix}/part-{str(i).zfill(5)}"
         
         s3.put_object(
             Bucket=bucket,
