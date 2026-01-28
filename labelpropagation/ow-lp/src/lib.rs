@@ -258,6 +258,9 @@ async fn load_partition_flat(
     offsets[params.num_nodes as usize] = current_offset;
 
     println!("[Worker {}] Final graph size: {} owned nodes, {} edges", worker_id, owned_nodes.len(), flat_edges.len());
+    if flat_edges.is_empty() {
+        panic!("[Worker {}] CRITICAL: No edges loaded! Check S3 connectivity and bucket: {}", worker_id, params.input_data.key);
+    }
     (CSRGraph { owned_nodes, offsets, flat_edges }, initial_labels)
 }
 
@@ -572,22 +575,25 @@ fn label_propagation(
         
         println!("{}", report);
         
-        let labels_json = serde_json::json!({ "labels": labels_map });
-        let labels_str = serde_json::to_string(&labels_json).unwrap();
-        
         let output_key = format!("{}/output/labels_final.json", params.input_data.key);
-        let write_result = rt.block_on(async {
-            s3_client.put_object()
-                .bucket(&params.input_data.bucket)
-                .key(&output_key)
-                .body(labels_str.into_bytes().into())
-                .send()
-                .await
-        });
-        
-        match write_result {
-            Ok(_) => println!("[Worker {}] ✓ Wrote final labels to s3://{}/{}", worker, params.input_data.bucket, output_key),
-            Err(e) => eprintln!("[Worker {}] ✗ Failed to write labels: {:?}", worker, e),
+
+        if labels_map.len() < 10_000_000 {
+            let labels_json = serde_json::json!({ "labels": labels_map });
+            let labels_str = serde_json::to_string(&labels_json).unwrap();
+            let write_result = rt.block_on(async {
+                s3_client.put_object()
+                    .bucket(&params.input_data.bucket)
+                    .key(&output_key)
+                    .body(labels_str.into_bytes().into())
+                    .send()
+                    .await
+            });
+            match write_result {
+                Ok(_) => println!("[Worker {}] ✓ Wrote final labels to s3://{}/{}", worker, params.input_data.bucket, output_key),
+                Err(e) => eprintln!("[Worker {}] ✗ Failed to write labels: {:?}", worker, e),
+            }
+        } else {
+            println!("[Worker {}] ! Skipping large JSON serialization for S3 ({} nodes)", worker, labels_map.len());
         }
         
         timestamps.push(timestamp("write_labels_end"));

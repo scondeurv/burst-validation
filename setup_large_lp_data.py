@@ -69,7 +69,7 @@ def generate_large_graph(num_nodes, num_partitions, output_local, bucket=None, s
         for i, part_edges in enumerate(partitions):
             if part_edges:
                 data = '\n'.join(part_edges).encode('utf-8')
-                object_name = f"{s3_prefix}/part-{i}"
+                object_name = f"{s3_prefix}/part-{str(i).zfill(5)}"
                 s3.put_object(
                     Bucket=bucket,
                     Key=object_name,

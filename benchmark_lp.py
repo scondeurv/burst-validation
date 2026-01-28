@@ -94,19 +94,19 @@ def run_validation(graph_file, num_nodes, bucket, key, endpoint):
     
     return True
 
-def benchmark_burst(num_nodes, num_partitions, max_iter, memory_mb, ow_host="localhost", ow_port=31001):
+def benchmark_burst(num_nodes, num_partitions, max_iter, memory_mb, granularity=1, ow_host="localhost", ow_port=31001, s3_endpoint="http://minio-service.default.svc.cluster.local:9000"):
     """Run burst Label Propagation and return execution time in ms"""
     s3_prefix = f"graphs/large-{num_nodes}"
     
     params = generate_payload(
-        endpoint="http://minio-service.default:9000",
+        endpoint=s3_endpoint,
         partitions=num_partitions,
         num_nodes=num_nodes,
         bucket="test-bucket",
         key=s3_prefix,
         convergence_threshold=0,
         max_iterations=max_iter,
-        granularity=1
+        granularity=granularity
     )
     
     executor = OpenwhiskExecutor(ow_host, ow_port, debug=True)
@@ -144,6 +144,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark LP: Standalone vs Burst")
     parser.add_argument("--nodes", type=int, required=True, help="Number of nodes")
     parser.add_argument("--partitions", type=int, default=8, help="Number of partitions for burst")
+    parser.add_argument("--granularity", type=int, default=1, help="Granularity for burst")
     parser.add_argument("--iter", type=int, default=10, help="Max iterations")
     parser.add_argument("--memory", type=int, default=512, help="Memory per worker (MB)")
     parser.add_argument("--ow-host", type=str, default="localhost", help="OpenWhisk host")
@@ -151,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("--skip-standalone", action="store_true", help="Skip standalone benchmark")
     parser.add_argument("--skip-burst", action="store_true", help="Skip burst benchmark")
     parser.add_argument("--validate", action="store_true", help="Validate burst results against standalone")
-    parser.add_argument("--s3-endpoint", default="http://minio-service.default:9000", help="S3 endpoint for validation")
+    parser.add_argument("--s3-endpoint", default="http://minio-service.default.svc.cluster.local:9000", help="S3 endpoint for workers inside cluster")
     parser.add_argument("--bucket", default="test-bucket", help="S3 bucket name")
     parser.add_argument("--key-prefix", default="graphs", help="S3 key prefix")
     
@@ -178,8 +179,10 @@ if __name__ == "__main__":
             args.partitions, 
             args.iter, 
             args.memory,
+            args.granularity,
             args.ow_host,
-            args.ow_port
+            args.ow_port,
+            args.s3_endpoint
         )
         if burst_time is not None:
             print(f"Burst Time: {burst_time}")
