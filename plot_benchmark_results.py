@@ -5,15 +5,15 @@ Plot Label Propagation Benchmark Results: Burst vs Standalone
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Updated Benchmark data (from latest runs)
-nodes = [1, 5, 15, 25]  # Million nodes
-edges = [10, 50, 150, 250]  # Million edges
-times_burst = [5.04, 14.1, 33.3, 50.8]  # seconds
-times_standalone = [3.61, 21.6, 63.8, 108.4]  # seconds
+# Updated Benchmark data (from latest complete crossover study)
+nodes = [0.5, 2, 5, 8, 10]  # Million nodes
+edges = [5, 20, 50, 80, 100]  # Million edges
+times_burst = [13.89, 15.99, 20.08, 26.77, 26.86]  # seconds
+times_standalone = [1.76, 7.66, 18.50, 31.31, 38.29]  # seconds
 
 # Create figure with subplots
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('Label Propagation Performance: OpenWhisk Burst vs Sequential Rust', 
+fig.suptitle('Label Propagation Performance: Crossover Point Analysis\nOpenWhisk Burst (4 workers) vs Standalone Rust', 
              fontsize=16, fontweight='bold')
 
 # 1. Execution Time Comparison
@@ -28,12 +28,14 @@ ax1.legend()
 # 2. Speedup
 speedup = [s/b for s, b in zip(times_standalone, times_burst)]
 ax2.plot(nodes, speedup, 'D-', linewidth=2, markersize=8, color='#F18F01')
-ax2.axhline(y=1, color='red', linestyle='--', alpha=0.5)
+ax2.axhline(y=1, color='red', linestyle='--', alpha=0.7, linewidth=2, label='Crossover (1.0x)')
+ax2.axvline(x=6, color='green', linestyle=':', alpha=0.5, linewidth=2, label='Estimated Crossover (~6M)')
 ax2.set_xlabel('Nodes (Millions)', fontsize=12)
 ax2.set_ylabel('Speedup (Standalone / Burst)', fontsize=12)
-ax2.set_title('Relative Speedup', fontsize=13, fontweight='bold')
+ax2.set_title('Relative Speedup (Crossover at ~6M nodes)', fontsize=13, fontweight='bold')
 ax2.grid(True, alpha=0.3)
-ax2.set_ylim(0, max(speedup) * 1.5)
+ax2.set_ylim(0, max(speedup) * 1.2)
+ax2.legend()
 
 # Add speedup labels
 for i, (x, s) in enumerate(zip(nodes, speedup)):
@@ -56,12 +58,12 @@ standalone_scaling = [times_standalone[i]/times_standalone[0] for i in range(len
 burst_scaling = [times_burst[i]/times_burst[0] for i in range(len(nodes))]
 size_scaling = [nodes[i]/nodes[0] for i in range(len(nodes))]
 
-ax4.plot(nodes, size_scaling, '--', color='gray', label='Ideal (Linear)', alpha=0.5)
-ax4.plot(nodes, standalone_scaling, 's-', color='#A23B72', label='Standalone Growth')
-ax4.plot(nodes, burst_scaling, 'o-', color='#2E86AB', label='Burst Growth')
+ax4.plot(nodes, size_scaling, '--', color='gray', label='Ideal (Linear)', alpha=0.5, linewidth=2)
+ax4.plot(nodes, standalone_scaling, 's-', color='#A23B72', label='Standalone Growth', linewidth=2, markersize=8)
+ax4.plot(nodes, burst_scaling, 'o-', color='#2E86AB', label='Burst Growth', linewidth=2, markersize=8)
 ax4.set_xlabel('Nodes (Millions)', fontsize=12)
 ax4.set_ylabel('Relative Growth Factor', fontsize=12)
-ax4.set_title('Scaling Factor vs Baseline (1M)', fontsize=13, fontweight='bold')
+ax4.set_title('Scaling Factor vs Baseline (0.5M)', fontsize=13, fontweight='bold')
 ax4.grid(True, alpha=0.3)
 ax4.legend()
 
