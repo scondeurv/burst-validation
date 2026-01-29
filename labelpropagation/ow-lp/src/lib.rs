@@ -535,10 +535,8 @@ fn label_propagation(
         &labels_b
     };
 
-    // Worker 0 writes final labels to S3 for validation and generates results report
+    // Worker 0 generates results report (not counted in processing time)
     let results_report = if worker == ROOT_WORKER {
-        timestamps.push(timestamp("write_labels_start"));
-        
         let labels_map: std::collections::HashMap<String, u32> = (0..params.num_nodes)
             .map(|i| (i.to_string(), final_labels[i as usize]))
             .collect();
@@ -574,29 +572,6 @@ fn label_propagation(
         report.push_str("=================================\n");
         
         println!("{}", report);
-        
-        let output_key = format!("{}/output/labels_final.json", params.input_data.key);
-
-        if labels_map.len() < 10_000_000 {
-            let labels_json = serde_json::json!({ "labels": labels_map });
-            let labels_str = serde_json::to_string(&labels_json).unwrap();
-            let write_result = rt.block_on(async {
-                s3_client.put_object()
-                    .bucket(&params.input_data.bucket)
-                    .key(&output_key)
-                    .body(labels_str.into_bytes().into())
-                    .send()
-                    .await
-            });
-            match write_result {
-                Ok(_) => println!("[Worker {}] ✓ Wrote final labels to s3://{}/{}", worker, params.input_data.bucket, output_key),
-                Err(e) => eprintln!("[Worker {}] ✗ Failed to write labels: {:?}", worker, e),
-            }
-        } else {
-            println!("[Worker {}] ! Skipping large JSON serialization for S3 ({} nodes)", worker, labels_map.len());
-        }
-        
-        timestamps.push(timestamp("write_labels_end"));
         Some(report)
     } else {
         None
